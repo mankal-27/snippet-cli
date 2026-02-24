@@ -10,7 +10,8 @@ const inquirer = require('inquirer'); // <-- 1. Import Inquirer
 
 const program = new Command();
 const CONFIG_PATH = path.join(os.homedir(), '.snippet-cli.json');
-const API_URL = 'http://localhost:3000/api';
+// Use the saved URL from config, or fallback to localhost
+const API_URL = config.get('apiUrl') || 'http://localhost:3000/api';
 
 function saveToken(token) {
   fs.writeFileSync(CONFIG_PATH, JSON.stringify({ token }));
@@ -165,4 +166,12 @@ program
     }
   });
 
+  program
+  .command('config <url>')
+  .description('Set the backend API URL')
+  .action((url) => {
+    config.set('apiUrl', url);
+    console.log(chalk.green(`✅ API URL set to: ${url}`));
+  });
+  
 program.parse(process.argv);

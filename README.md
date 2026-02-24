@@ -19,6 +19,18 @@ Install the package globally via NPM:
 ```bash
 npm i dev-snip-cli
 ```
+## ⚙️ Configuration (Required)
+
+By default, this CLI connects to `http://localhost:3000`. To use this tool, you must have the [Snippet Search Backend](https://github.com/mankal-27/snippet-search-mvp) running.
+
+#### TODO
+backend need to be hosted on a different port or a remote server, configure the CLI before starting:
+```bash
+snip config <url>
+# Example: snip config [https://my-api.railway.app/api](https://my-api.railway.app/api)
+```
+
+
 
 ## 🚀 Usage
 
