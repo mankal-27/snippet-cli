@@ -6,20 +6,41 @@ const path = require('path');
 const chalk = require('chalk');
 const axios = require('axios');
 const clipboardy = require('clipboardy');
-const inquirer = require('inquirer'); // <-- 1. Import Inquirer
+const inquirer = require('inquirer');
 
 const program = new Command();
 const CONFIG_PATH = path.join(os.homedir(), '.snippet-cli.json');
-// Use the saved URL from config, or fallback to localhost
-const API_URL = config.get('apiUrl') || 'http://localhost:3000/api';
 
+// --- Native Config Management ---
+function getConfig() {
+  if (fs.existsSync(CONFIG_PATH)) {
+    try {
+      return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
+    } catch (e) {
+      return {}; // If file is corrupted, return empty object
+    }
+  }
+  return {};
+}
+
+function updateConfig(newValues) {
+  const current = getConfig();
+  fs.writeFileSync(CONFIG_PATH, JSON.stringify({ ...current, ...newValues }, null, 2));
+}
+
+// 1. Load Config & Set API URL
+const configData = getConfig();
+const API_URL = configData.apiUrl || 'http://localhost:3000/api';
+
+// 2. Token Management
 function saveToken(token) {
-  fs.writeFileSync(CONFIG_PATH, JSON.stringify({ token }));
+  updateConfig({ token });
   console.log(chalk.green('✅ Authentication successful! Token saved locally.'));
 }
 
 function getToken() {
-  if (fs.existsSync(CONFIG_PATH)) return JSON.parse(fs.readFileSync(CONFIG_PATH)).token;
+  const token = getConfig().token;
+  if (token) return token;
   console.log(chalk.red('❌ You are not logged in. Run: snip login <your-jwt>'));
   process.exit(1);
 }
@@ -31,6 +52,7 @@ function getHeaders() {
 program.name('snip').description('A lightning-fast CLI for your personal code snippets').version('1.0.0');
 
 program.command('login <token>').action(saveToken);
+
 program.command('whoami').action(() => {
   if (getToken()) console.log(chalk.blue('ℹ️  You are logged in and ready to snip.'));
 });
@@ -68,7 +90,7 @@ program
 
           if (blockTitle && blockCode) {
             await axios.post(`${API_URL}/snippets`, { 
-              title: `Docker: ${blockTitle}`, // Group them nicely with a prefix
+              title: blockTitle, 
               code_content: blockCode, 
               language: options.language || 'bash'
             }, { headers: getHeaders() });
@@ -166,11 +188,12 @@ program
     }
   });
 
-  program
+// 3. The Config Command
+program
   .command('config <url>')
   .description('Set the backend API URL')
   .action((url) => {
-    config.set('apiUrl', url);
+    updateConfig({ apiUrl: url });
     console.log(chalk.green(`✅ API URL set to: ${url}`));
   });
   
