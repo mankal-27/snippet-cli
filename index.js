@@ -49,8 +49,12 @@ function getHeaders() {
   return { Authorization: `Bearer ${getToken()}` };
 }
 
-program.name('snip').description('A lightning-fast CLI for your personal code snippets').version('1.0.0');
+program
+  .name('snip')
+  .description('A lightning-fast CLI for your personal code snippets')
+  .version(require('./package.json').version);
 
+  
 program.command('login <token>').action(saveToken);
 
 program.command('whoami').action(() => {
