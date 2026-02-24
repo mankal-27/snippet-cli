@@ -17,7 +17,7 @@ Built for developers who want to stay in their flow state. `snip` allows you to 
 
 Install the package globally via NPM:
 ```bash
-npm install -g your-published-package-name
+npm i dev-snip-cli
 ```
 
 ## 🚀 Usage
